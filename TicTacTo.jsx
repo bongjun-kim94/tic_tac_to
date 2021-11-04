@@ -8,7 +8,14 @@ const initialState = {
 };
 
 const reducer = (state, action) => {
-
+    switch (action.type) {
+        case 'SET_WINNER':
+            // state.winner = action.winner; 이렇게 하면 안됨.
+            return {
+                ...state,
+                winner: action.winner,
+            }
+    }
 };
 
 const TicTacTo = () => {
@@ -19,7 +26,7 @@ const TicTacTo = () => {
 
     // 컴포넌트에 넣는 이벤트 함수들은 모두 useCallback
     const onClickTable = useCallback(() => {
-
+        dispatch({ type: 'SET_WINNER', winner: '0'})
     }, []);
     return (
         <>
