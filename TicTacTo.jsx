@@ -4,7 +4,7 @@ import Table from './Table';
 const initialState = {
     winner: '',
     turn: '0',
-    tableDate: [['','',''], ['','','',], ['','','',]],
+    tableData: [['','',''], ['','','',], ['','','',]],
 };
 
 export const SET_WINNER = 'SET_WINNER';
@@ -50,8 +50,8 @@ const TicTacTo = () => {
 
     return (
         <>
-            <Table onClick={onClickTable} tableData={state.tableData} />
-            {winner && <div>{state.winner}님의 승리</div>}
+            <Table onClick={onClickTable} tableData={state.tableData} dispatch={dispatch} />
+            {state.winner && <div>{state.winner}님의 승리</div>}
         </>
     );
 }
