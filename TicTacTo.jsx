@@ -1,15 +1,21 @@
-import React, { useReducer, useCallback } from 'react';
+import React, { useEffect, useReducer, useCallback } from 'react';
 import Table from './Table';
 
 const initialState = {
     winner: '',
-    turn: '0',
-    tableData: [['','',''], ['','','',], ['','','',]],
+    turn: 'O',
+    tableData: [
+        ['','',''], 
+        ['','','',], 
+        ['','','',],
+    ],
+    recentCell: [-1, -1],
 };
 
 export const SET_WINNER = 'SET_WINNER';
 export const CLICK_CELL = 'CLICK_CELL';
 export const CHANGE_TURN = 'SET_TURN';
+export const RESET_GAME = 'RESET_GAME';
 
 const reducer = (state, action) => {
     switch (action.type) {
@@ -26,6 +32,7 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 tableData,
+                recentCell: [action.row, action.cell],
             };
         }
         case CHANGE_TURN: {
@@ -34,24 +41,84 @@ const reducer = (state, action) => {
                 turn: state.turn === 'O' ? 'X' : 'O',
             };
         }
+        case RESET_GAME: {
+            return {
+                ...state,
+                turn: 'O',
+                tableData: [
+                    ['','',''], 
+                    ['','','',], 
+                    ['','','',],
+                ],
+                recentCell: [-1, -1],
+            };
+        }
+        default:
+            return state;
     }
 };
 
 const TicTacTo = () => {
     const [state, dispatch] = useReducer(reducer, initialState);
+    const { tableData, turn, winner, recentCell } = state;
     // const [winner, setWinner] = useState('');
     // const [turn, setTurn] = useState('0');
     // const [tableData, setTableData] = useState([['','',''], ['','','',], ['','','',]]);
 
     // 컴포넌트에 넣는 이벤트 함수들은 모두 useCallback
     const onClickTable = useCallback(() => {
-        dispatch({ type: SET_WINNER, winner: '0'})
+        dispatch({ type: SET_WINNER, winner: 'O'})
     }, []);
+
+    // 비동기적인 state를 사용(처리)할 땐 useEffect를 사용
+    useEffect(() => {
+        const [row, cell] = recentCell;
+        // row가 -1이면 실행되지 않게
+        if (row < 0) {
+            return;
+        }
+        let win = false;
+        // 가로 줄 검사
+        if (tableData[row][0] === turn && tableData[row][1] === turn && tableData[row][2] === turn) {
+            win = true;
+        }
+        // 세로 줄 검사
+        if (tableData[cell][0] === turn && tableData[cell][1] === turn && tableData[cell][2] === turn) {
+            win = true;
+        }
+        // 대각선 검사
+        if (tableData[0][0] === turn && tableData[1][1] === turn && tableData[2][2] === turn) {
+            win = true;
+        }
+        if (tableData[0][2] === turn && tableData[1][1] === turn && tableData[2][0] === turn) {
+            win = true;
+        }
+        // 승리 시
+        if (win) {
+            dispatch({ type: SET_WINNER, winner: turn });
+            dispatch({ type: RESET_GAME });
+        // 무승부 검사
+        } else {
+            let all = true; // all이 true면 무승부라는 뜻
+            tableData.forEach((row) => {
+                row.forEach((cell) => {
+                    if (!cell) {
+                        all = false;
+                    }
+                });
+            });
+            if (all) {
+                dispatch({ type: RESET_GAME });
+            } else {
+                dispatch({ type: CHANGE_TURN });
+            }
+        }
+    }, [recentCell]);
 
     return (
         <>
-            <Table onClick={onClickTable} tableData={state.tableData} dispatch={dispatch} />
-            {state.winner && <div>{state.winner}님의 승리</div>}
+            <Table onClick={onClickTable} tableData={tableData} dispatch={dispatch} />
+            {winner && <div>{winner}님의 승리</div>}
         </>
     );
 }
