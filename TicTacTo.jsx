@@ -108,6 +108,7 @@ const TicTacTo = () => {
                 });
             });
             if (all) {
+                dispatch({ type: SET_WINNER, winner: null });
                 dispatch({ type: RESET_GAME });
             } else {
                 dispatch({ type: CHANGE_TURN });
